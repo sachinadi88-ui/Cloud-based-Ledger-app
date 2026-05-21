@@ -52,6 +52,7 @@ export default function App() {
   const [tempNames, setTempNames] = useState<string[]>(['', '']);
   const [setupError, setSetupError] = useState<string | null>(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   // Monitor Auth State and fetch Cloud Data if logged in
   useEffect(() => {
@@ -129,10 +130,23 @@ export default function App() {
   const handleGoogleLogin = async () => {
     try {
       setAuthLoading(true);
+      setAuthError(null);
       await signInWithPopup(auth, googleProvider);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Google Sign In Failure", err);
       setAuthLoading(false);
+      
+      let message = "Google Authentication was unsuccessful. Please check your browser popup permission and network settings, then try again.";
+      if (err && (err.code === 'auth/unauthorized-domain' || (err.message && err.message.includes('unauthorized-domain')))) {
+        message = `Unauthorized Domain: The domain "${window.location.hostname || 'your deployment domain'}" is not authorized for Google Sign-In in your Firebase Console. Please authorize this URL to allow users to sign in.`;
+      } else if (err && err.code === 'auth/popup-blocked') {
+        message = "Popup Blocked: Your browser blocked the Google Sign-In popup. Please allow popups for this website in your browser settings and try again.";
+      } else if (err && err.code === 'auth/network-request-failed') {
+        message = "Network Error: Failed to connect to Firebase. Please check your internet connection.";
+      } else if (err && err.message) {
+        message = err.message;
+      }
+      setAuthError(message);
     }
   };
 
@@ -1096,6 +1110,61 @@ export default function App() {
                   className="px-5 py-2.5 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl hover:shadow-lg shadow-rose-100 transition-all cursor-pointer border-none focus:outline-none"
                 >
                   Confirm Reset
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Google Authentication Error Modal */}
+      <AnimatePresence>
+        {authError && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-white max-w-md w-full rounded-2xl shadow-xl border border-slate-100 p-6 relative overflow-hidden text-left"
+            >
+              <button
+                onClick={() => setAuthError(null)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100 transition-colors cursor-pointer border-none bg-transparent focus:outline-none"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="flex items-start gap-4 mb-5">
+                <div className="bg-rose-50 p-3 rounded-xl text-rose-600 shrink-0">
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-sans font-bold text-slate-800">Connection Failed</h3>
+                  <p className="text-sm text-slate-500 mt-2 leading-relaxed font-sans">
+                    {authError}
+                  </p>
+                </div>
+              </div>
+
+              {(authError.includes("Unauthorized Domain") || authError.toLowerCase().includes("unauthorized")) && (
+                <div className="bg-slate-50 border border-slate-100 rounded-xl p-4.5 mb-5 text-[12px] text-slate-600 leading-relaxed font-sans">
+                  <p className="font-semibold text-slate-700 mb-1.5">How to resolve this:</p>
+                  <ol className="list-decimal list-inside space-y-1.5">
+                    <li>Go to your <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline font-semibold">Firebase Console</a>.</li>
+                    <li>Select this project, go to <strong>Authentication</strong>, and click the <strong>Settings</strong> tab.</li>
+                    <li>Click on <strong>Authorized Domains</strong> under settings.</li>
+                    <li>Click <strong>Add domain</strong> and enter: <code className="bg-slate-200/60 px-1.5 py-0.5 rounded text-indigo-700 font-mono text-[11px] font-bold">{window.location.hostname}</code></li>
+                  </ol>
+                </div>
+              )}
+
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setAuthError(null)}
+                  className="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl hover:shadow-lg shadow-indigo-100 transition-all cursor-pointer border-none focus:outline-none"
+                >
+                  Dismiss
                 </button>
               </div>
             </motion.div>
