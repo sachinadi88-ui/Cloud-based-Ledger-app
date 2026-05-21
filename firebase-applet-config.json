@@ -1,10 +1,10 @@
 {
-  "projectId": "psyched-star-xcff3",
-  "appId": "1:764220476228:web:17c9385850203df3dae511",
-  "apiKey": "AIzaSyBmqi5QS8fMuTKOsb7rXAoRzOPVSU-2dg0",
-  "authDomain": "psyched-star-xcff3.firebaseapp.com",
+  "projectId": "cloud-based-smart-project",
+  "appId": "1:876465746879:web:b205418e0b8de5ebe1a70a",
+  "apiKey": "AIzaSyCZviKXmKcIUfqRdBV7cdWaH3zv-X_RnS4",
+  "authDomain": "cloud-based-smart-project.firebaseapp.com",
   "firestoreDatabaseId": "ai-studio-695d2fba-b37f-4e81-be8c-08a39084b792",
-  "storageBucket": "psyched-star-xcff3.firebasestorage.app",
-  "messagingSenderId": "764220476228",
-  "measurementId": ""
+  "storageBucket": "cloud-based-smart-project.firebasestorage.app",
+  "messagingSenderId": "876465746879",
+  "measurementId": "G-EMTMVYGP2R"
 }
