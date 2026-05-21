@@ -3,7 +3,7 @@
   "appId": "1:876465746879:web:b205418e0b8de5ebe1a70a",
   "apiKey": "AIzaSyCZviKXmKcIUfqRdBV7cdWaH3zv-X_RnS4",
   "authDomain": "cloud-based-smart-project.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-695d2fba-b37f-4e81-be8c-08a39084b792",
+  "firestoreDatabaseId": "(default)",
   "storageBucket": "cloud-based-smart-project.firebasestorage.app",
   "messagingSenderId": "876465746879",
   "measurementId": "G-EMTMVYGP2R"
