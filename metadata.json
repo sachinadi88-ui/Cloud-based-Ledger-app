@@ -1,0 +1,8 @@
+{
+  "name": "Google Cloud Integrated Smart Ledger",
+  "description": "A streamlined multi-user smart ledger featuring authenticated Google Cloud synchronization, participant-based payment breakdowns, export tools, and seamless Guest mode fallback.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

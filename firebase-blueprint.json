@@ -1,0 +1,88 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile containing meta and the list of tracking individuals.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "people": {
+          "type": "array"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "uid",
+        "email",
+        "people"
+      ]
+    },
+    "LedgerRow": {
+      "title": "LedgerRow",
+      "description": "An individual ledger item containing details, amounts, splitting individual, and payment modes.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "particulars1": {
+          "type": "string"
+        },
+        "particulars2": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "number"
+        },
+        "paymentMode": {
+          "type": "string",
+          "enum": [
+            "Cash",
+            "Online"
+          ]
+        },
+        "person": {
+          "type": "string"
+        },
+        "index": {
+          "type": "integer"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "particulars1",
+        "particulars2",
+        "amount",
+        "paymentMode",
+        "person",
+        "index"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile holding configuration and split expense participants list"
+    },
+    "/users/{userId}/entries/{entryId}": {
+      "schema": "LedgerRow",
+      "description": "Sub collection of ledger entries belonging to a specific user"
+    }
+  }
+}

@@ -1,0 +1,88 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global safety net - Default Deny Catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper Primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Schema Validation Blueprint: UserProfile
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['uid', 'email', 'people', 'updatedAt'])
+        && data.keys().size() == 4
+        && data.uid is string && data.uid.size() <= 128 && data.uid == request.auth.uid
+        && data.email is string && data.email.size() <= 200
+        && data.people is list && data.people.size() <= 15
+        && (data.people.size() == 0 || (data.people[0] is string && data.people[0].size() <= 100))
+        && data.updatedAt is timestamp;
+    }
+
+    // Schema Validation Blueprint: LedgerRow
+    function isValidLedgerRow(data) {
+      return data.keys().hasAll(['id', 'particulars1', 'particulars2', 'amount', 'paymentMode', 'person', 'index', 'createdAt', 'updatedAt'])
+        && data.keys().size() == 9
+        && data.id is string && data.id.size() <= 128
+        && data.particulars1 is string && data.particulars1.size() <= 250
+        && data.particulars2 is string && data.particulars2.size() <= 250
+        && (data.amount is number || data.amount is int || data.amount is float)
+        && data.paymentMode is string && (data.paymentMode == 'Cash' || data.paymentMode == 'Online')
+        && data.person is string && data.person.size() <= 100
+        && (data.index is int || data.index is number) && data.index >= 0
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    // 1. Matches user profile
+    match /users/{userId} {
+      allow read: if isSignedIn() && userId == request.auth.uid;
+      
+      allow create: if isSignedIn() && userId == request.auth.uid 
+        && isValidUserProfile(incoming()) 
+        && incoming().updatedAt == request.time;
+        
+      allow update: if isSignedIn() && userId == request.auth.uid 
+        && isValidUserProfile(incoming()) 
+        && incoming().updatedAt == request.time
+        && incoming().uid == existing().uid
+        && incoming().email == existing().email;
+    }
+
+    // 2. Matches subcollection of ledger rows
+    match /users/{userId}/entries/{entryId} {
+      allow read, list: if isSignedIn() && userId == request.auth.uid;
+      
+      allow create: if isSignedIn() && userId == request.auth.uid 
+        && isValidId(entryId)
+        && isValidLedgerRow(incoming()) 
+        && incoming().createdAt == request.time 
+        && incoming().updatedAt == request.time;
+        
+      allow update: if isSignedIn() && userId == request.auth.uid 
+        && isValidId(entryId)
+        && isValidLedgerRow(incoming()) 
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time;
+        
+      allow delete: if isSignedIn() && userId == request.auth.uid 
+        && isValidId(entryId);
+    }
+  }
+}
