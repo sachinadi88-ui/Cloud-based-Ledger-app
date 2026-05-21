@@ -837,29 +837,32 @@ export default function App() {
               </button>
             </div>
 
-            <button
-              onClick={editParticipants}
-              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 transition-colors rounded-md cursor-pointer border border-transparent hover:border-slate-200/40 bg-transparent"
-              title="Edit sharing individuals and their names"
-            >
-              <Users className="w-4 h-4 text-indigo-500" />
-              Person: ({people.length})
-            </button>
+            <div className="flex items-center gap-2 max-w-full overflow-x-auto scrollbar-none py-1">
+              <button
+                onClick={editParticipants}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 border border-slate-200 transition-colors rounded-md cursor-pointer bg-white focus:outline-none shrink-0"
+                title="Edit sharing individuals and their names"
+              >
+                <Users className="w-4 h-4 text-indigo-500" />
+                Person: ({people.length})
+              </button>
 
-            <button
-              onClick={exportToCSV}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50 transition-colors rounded-md border border-indigo-100 cursor-pointer bg-white"
-            >
-              <Download className="w-4 h-4" />
-              Export CSV
-            </button>
-            <button
-              onClick={resetData}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 transition-colors rounded-md cursor-pointer border-none bg-transparent"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Reset
-            </button>
+              <button
+                onClick={exportToCSV}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50 transition-colors rounded-md border border-indigo-100 cursor-pointer bg-white focus:outline-none shrink-0"
+              >
+                <Download className="w-4 h-4" />
+                Export CSV
+              </button>
+
+              <button
+                onClick={resetData}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors rounded-md border border-slate-200 cursor-pointer bg-white focus:outline-none shrink-0"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Reset
+              </button>
+            </div>
           </div>
         </header>
 
