@@ -71,7 +71,7 @@ self.addEventListener('fetch', (event) => {
 
       return fetch(request).then((networkResponse) => {
         // Only cache standard successful HTTP resources (skip stream or partial responses)
-        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+        if (networkResponse && networkResponse.status === 200 && (networkResponse.type === 'basic' || networkResponse.type === 'cors')) {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(request, responseToCache);
