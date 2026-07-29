@@ -54,6 +54,11 @@ export default function App() {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
+  // PWA & Connection states
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+
   // Monitor Auth State and fetch Cloud Data if logged in
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -126,6 +131,48 @@ export default function App() {
 
     return () => unsubscribe();
   }, []);
+
+  // Monitor offline/online status to show status banners
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // Capture PWA install prompt
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      // Only show banner if the app is not already installed/running in standalone mode
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        return;
+      }
+      setShowInstallBanner(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const triggerInstall = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`User response to install prompt: ${outcome}`);
+    setDeferredPrompt(null);
+    setShowInstallBanner(false);
+  };
 
   const handleGoogleLogin = async () => {
     try {
@@ -465,10 +512,76 @@ export default function App() {
     setHasSetup(false);
   };
 
+  const renderPwaElements = () => {
+    return (
+      <>
+        {/* Offline Warning Banner */}
+        <AnimatePresence>
+          {isOffline && (
+            <motion.div
+              initial={{ opacity: 0, y: -40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -40 }}
+              className="fixed top-0 left-0 right-0 z-50 bg-amber-600 text-white text-xs py-2.5 px-4 flex items-center justify-center gap-2 font-medium text-center shadow-md"
+            >
+              <CloudOff className="w-3.5 h-3.5" />
+              <span>Offline mode active. Your transaction updates are saved locally and will auto-sync with Google Cloud when online.</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* PWA Install Promo Banner */}
+        <AnimatePresence>
+          {showInstallBanner && (
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
+              className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-md z-50 bg-slate-900 text-white p-4.5 rounded-2xl shadow-2xl border border-slate-800 flex flex-col gap-3 text-left"
+            >
+              <div className="flex items-start gap-3">
+                <div className="bg-indigo-600 p-2 rounded-xl shrink-0">
+                  <TableIcon className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-sm font-semibold text-white">Install Smart Ledger</h4>
+                  <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                    Add Smart Ledger to your home screen for rapid loading, instant offline bookkeeping, and native app experience.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowInstallBanner(false)}
+                  className="text-slate-400 hover:text-white transition-colors cursor-pointer p-0.5 border-none bg-transparent"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="flex gap-2 justify-end">
+                <button
+                  onClick={() => setShowInstallBanner(false)}
+                  className="px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer border-none bg-transparent"
+                >
+                  Maybe Later
+                </button>
+                <button
+                  onClick={triggerInstall}
+                  className="px-4 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-lg shadow-indigo-900/40 transition-colors cursor-pointer border-none"
+                >
+                  Install Now
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </>
+    );
+  };
+
   // 1. Loading screen
   if (authLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        {renderPwaElements()}
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-indigo-600/10 flex items-center justify-center border border-indigo-100">
             <RefreshCw className="w-6 h-6 text-indigo-600 animate-spin" />
@@ -485,6 +598,7 @@ export default function App() {
   if (!user && !isGuest) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 md:p-8">
+        {renderPwaElements()}
         <motion.div 
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
@@ -559,6 +673,7 @@ export default function App() {
   if (!hasSetup && setupStep === 1) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        {renderPwaElements()}
         <motion.div 
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
@@ -646,6 +761,7 @@ export default function App() {
   if (!hasSetup && setupStep === 2) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        {renderPwaElements()}
         <motion.div 
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
@@ -733,6 +849,7 @@ export default function App() {
   // 5. MAIN DASHBOARD UI
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 p-4 md:p-8">
+      {renderPwaElements()}
       <div className="max-w-5xl mx-auto">
         
         {/* Floating Sync notifications */}
