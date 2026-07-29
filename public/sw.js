@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-ledger-cache-v1';
+const CACHE_NAME = 'smart-ledger-cache-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -7,16 +7,20 @@ const ASSETS_TO_CACHE = [
   '/icon-192.png',
   '/icon-512.png',
   '/favicon.png',
+  '/favicon-16x16.png',
+  '/favicon-32x32.png',
   '/favicon.ico',
   '/apple-touch-icon.png'
 ];
 
-// Install Event - cache core static assets
+// Install Event - cache core static assets safely
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log('[Service Worker] Caching app shell and static assets');
-      return cache.addAll(ASSETS_TO_CACHE);
+      return Promise.allSettled(
+        ASSETS_TO_CACHE.map((url) => cache.add(url).catch((err) => console.warn('[SW] Failed to cache:', url, err)))
+      );
     }).then(() => self.skipWaiting())
   );
 });

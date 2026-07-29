@@ -580,9 +580,7 @@ export default function App() {
               className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-md z-50 bg-slate-900 text-white p-4.5 rounded-2xl shadow-2xl border border-slate-800 flex flex-col gap-3 text-left"
             >
               <div className="flex items-start gap-3">
-                <div className="bg-indigo-600 p-2 rounded-xl shrink-0">
-                  <TableIcon className="w-5 h-5 text-white" />
-                </div>
+                <img src="/icon-192.png" alt="App Icon" className="w-10 h-10 rounded-xl shrink-0 object-cover border border-slate-700 shadow-sm" />
                 <div className="flex-1">
                   <h4 className="text-sm font-semibold text-white">Install Smart Ledger</h4>
                   <p className="text-xs text-slate-400 mt-1 leading-relaxed">
