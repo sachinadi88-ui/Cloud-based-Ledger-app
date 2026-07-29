@@ -4,35 +4,18 @@ import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager
 import firebaseConfig from '../firebase-applet-config.json';
 import { OperationType, FirestoreErrorInfo } from './types';
 
-// Support Vercel / Client-side custom environments or fallback to local AI Studio project
-const isSandbox = typeof window !== 'undefined' && (
-  window.location.hostname.includes('run.app') || 
-  window.location.hostname.includes('aistudio')
-);
-
-// Fallback to local AI Studio project in sandbox, otherwise use your custom project defaults
-const configToUse = isSandbox ? firebaseConfig : {
-  apiKey: "AIzaSyCZviKXmKcIUfqRdBV7cdWaH3zv-X_RnS4",
-  authDomain: "cloud-based-smart-project.firebaseapp.com",
-  projectId: "cloud-based-smart-project",
-  storageBucket: "cloud-based-smart-project.firebasestorage.app",
-  messagingSenderId: "876465746879",
-  appId: "1:876465746879:web:b205418e0b8de5ebe1a70a",
-  measurementId: "G-EMTMVYGP2R",
-  firestoreDatabaseId: "(default)"
-};
-
+// Support Vercel / Client-side custom environments, defaulting to your custom Firebase project
 const resolvedConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || configToUse.apiKey,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || configToUse.authDomain,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || configToUse.projectId,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || configToUse.storageBucket,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || configToUse.messagingSenderId,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || configToUse.appId,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || (configToUse as any).measurementId || '',
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCZviKXmKcIUfqRdBV7cdWaH3zv-X_RnS4",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "cloud-based-smart-project.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "cloud-based-smart-project",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "cloud-based-smart-project.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "876465746879",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:876465746879:web:b205418e0b8de5ebe1a70a",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-EMTMVYGP2R",
 };
 
-const databaseId = import.meta.env.VITE_FIREBASE_FIRESTORE_DATABASE_ID || (configToUse as any).firestoreDatabaseId || (configToUse as any).databaseId || '(default)';
+const databaseId = import.meta.env.VITE_FIREBASE_FIRESTORE_DATABASE_ID || "(default)";
 
 const app = initializeApp(resolvedConfig);
 export const db = initializeFirestore(app, {
