@@ -7,7 +7,8 @@ const ASSETS_TO_CACHE = [
   '/icon-192.png',
   '/icon-512.png',
   '/favicon.png',
-  '/favicon.ico'
+  '/favicon.ico',
+  '/apple-touch-icon.png'
 ];
 
 // Install Event - cache core static assets
