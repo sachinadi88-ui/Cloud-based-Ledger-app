@@ -4,12 +4,27 @@ import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager
 import firebaseConfig from '../firebase-applet-config.json';
 import { OperationType, FirestoreErrorInfo } from './types';
 
-const app = initializeApp(firebaseConfig);
+// Support Vercel / Client-side custom environments or fallback to local AI Studio project
+const metaEnv = (import.meta as any).env || {};
+
+const resolvedConfig = {
+  apiKey: metaEnv.VITE_FIREBASE_API_KEY || firebaseConfig.apiKey,
+  authDomain: metaEnv.VITE_FIREBASE_AUTH_DOMAIN || firebaseConfig.authDomain,
+  projectId: metaEnv.VITE_FIREBASE_PROJECT_ID || firebaseConfig.projectId,
+  storageBucket: metaEnv.VITE_FIREBASE_STORAGE_BUCKET || firebaseConfig.storageBucket,
+  messagingSenderId: metaEnv.VITE_FIREBASE_MESSAGING_SENDER_ID || firebaseConfig.messagingSenderId,
+  appId: metaEnv.VITE_FIREBASE_APP_ID || firebaseConfig.appId,
+  measurementId: metaEnv.VITE_FIREBASE_MEASUREMENT_ID || (firebaseConfig as any).measurementId || '',
+};
+
+const databaseId = metaEnv.VITE_FIREBASE_FIRESTORE_DATABASE_ID || firebaseConfig.firestoreDatabaseId;
+
+const app = initializeApp(resolvedConfig);
 export const db = initializeFirestore(app, {
   localCache: persistentLocalCache({
     tabManager: persistentMultipleTabManager()
   })
-}, firebaseConfig.firestoreDatabaseId); /* CRITICAL: The app will break without this line */
+}, databaseId); /* CRITICAL: The app will break without this line */
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
