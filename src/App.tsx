@@ -116,6 +116,36 @@ export default function App() {
           }
         } catch (err) {
           console.error("Error synchronizing profile", err);
+          
+          // GRACEFUL FALLBACK: Load from localStorage if cloud fetch fails (e.g. offline)
+          const localPeopleRaw = localStorage.getItem('smart-ledger-people');
+          const localRowsRaw = localStorage.getItem('smart-ledger-data');
+          
+          let localPeople: string[] = [];
+          let localRows: LedgerRow[] = [];
+
+          if (localPeopleRaw) {
+            try { localPeople = JSON.parse(localPeopleRaw); } catch (e) {}
+          }
+          if (localRowsRaw) {
+            try { localRows = JSON.parse(localRowsRaw); } catch (e) {}
+          }
+
+          if (localPeople.length > 0 || localRows.length > 0) {
+            setPeople(localPeople);
+            const rowsToRestore = localRows.length > 0 ? localRows : [{ id: crypto.randomUUID(), particulars1: '', particulars2: '', amount: 0, paymentMode: 'Online' as const, person: localPeople[0] || '' }];
+            setRows(rowsToRestore);
+            setHasSetup(localPeople.length > 0);
+            setHistory([rowsToRestore]);
+            setHistoryIndex(0);
+            setSyncNotice("Operating offline. Displaying locally cached records.");
+          } else {
+            // No local backup found, start with empty setup
+            setPeople([]);
+            setRows([{ id: crypto.randomUUID(), particulars1: '', particulars2: '', amount: 0, paymentMode: 'Online' as const, person: '' }]);
+            setHasSetup(false);
+            setSetupStep(1);
+          }
         } finally {
           setCloudSyncing(false);
           setTimeout(() => setSyncNotice(null), 5000);
@@ -376,9 +406,17 @@ export default function App() {
         setIsSaved(true);
       } catch (err) {
         console.error("Cloud preservation failure", err);
+        // Fallback: Save to local storage and alert user they are offline but safe
+        localStorage.setItem('smart-ledger-data', JSON.stringify(rows));
+        localStorage.setItem('smart-ledger-people', JSON.stringify(people));
+        setIsSaved(true);
+        setSyncNotice("Saved locally (Offline). Records will automatically back up when online.");
       } finally {
         setCloudSyncing(false);
-        setTimeout(() => setIsSaved(false), 3000);
+        setTimeout(() => {
+          setIsSaved(false);
+          setSyncNotice(null);
+        }, 5000);
       }
     } else {
       localStorage.setItem('smart-ledger-data', JSON.stringify(rows));
@@ -498,6 +536,8 @@ export default function App() {
         await saveUserData(user.uid, user.email || '', finalNames, updatedRows);
       } catch (err) {
         console.error("Setup cloud save error", err);
+        setSyncNotice("Setup saved locally. Records will automatically back up when online.");
+        setTimeout(() => setSyncNotice(null), 5000);
       } finally {
         setCloudSyncing(false);
       }
