@@ -1,16 +1,9 @@
 const CACHE_NAME = 'smart-ledger-cache-v2';
 const ASSETS_TO_CACHE = [
   '/',
-  '/index.html',
   '/manifest.json',
-  '/icon.png',
-  '/icon-192.png',
-  '/icon-512.png',
   '/favicon.png',
-  '/favicon-16x16.png',
-  '/favicon-32x32.png',
-  '/favicon.ico',
-  '/apple-touch-icon.png'
+  '/favicon.ico'
 ];
 
 // Install Event - cache core static assets safely
@@ -61,7 +54,7 @@ self.addEventListener('fetch', (event) => {
         fetch(request).then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, networkResponse);
+              cache.put(request, networkResponse.clone());
             });
           }
         }).catch(() => {/* Ignore network errors offline */});

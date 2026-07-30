@@ -1123,15 +1123,6 @@ export default function App() {
 
             <div className="flex items-center gap-2 max-w-full overflow-x-auto scrollbar-none py-1">
               <button
-                onClick={handleInstallClick}
-                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors rounded-md border border-emerald-200 cursor-pointer focus:outline-none shrink-0 shadow-xs"
-                title="Install app on mobile/desktop"
-              >
-                <Smartphone className="w-4 h-4 text-emerald-600" />
-                Install App
-              </button>
-
-              <button
                 onClick={editParticipants}
                 className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 border border-slate-200 transition-colors rounded-md cursor-pointer bg-white focus:outline-none shrink-0"
                 title="Edit sharing individuals and their names"
