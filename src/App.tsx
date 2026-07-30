@@ -23,7 +23,12 @@ import {
   Cloud, 
   CloudOff, 
   RefreshCw, 
-  Check 
+  Check,
+  Smartphone,
+  Share2,
+  ExternalLink,
+  Compass,
+  HelpCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { onAuthStateChanged, signInWithPopup, signOut, User } from 'firebase/auth';
@@ -58,6 +63,15 @@ export default function App() {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const [showInstallGuideModal, setShowInstallGuideModal] = useState(false);
+
+  const handleInstallClick = () => {
+    if (deferredPrompt) {
+      triggerInstall();
+    } else {
+      setShowInstallGuideModal(true);
+    }
+  };
 
   // Monitor Auth State and fetch Cloud Data if logged in
   useEffect(() => {
@@ -596,19 +610,120 @@ export default function App() {
               </div>
               <div className="flex gap-2 justify-end">
                 <button
-                  onClick={() => setShowInstallBanner(false)}
+                  onClick={() => {
+                    setShowInstallBanner(false);
+                    setShowInstallGuideModal(true);
+                  }}
                   className="px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer border-none bg-transparent"
                 >
-                  Maybe Later
+                  How to Install?
                 </button>
                 <button
-                  onClick={triggerInstall}
+                  onClick={handleInstallClick}
                   className="px-4 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-lg shadow-indigo-900/40 transition-colors cursor-pointer border-none"
                 >
                   Install Now
                 </button>
               </div>
             </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* PWA & Mobile Install Guide Modal */}
+        <AnimatePresence>
+          {showInstallGuideModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-white rounded-2xl shadow-2xl border border-slate-100 max-w-lg w-full p-6 relative overflow-hidden text-left"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <img src="/icon-192.png" alt="App Logo" className="w-11 h-11 rounded-xl shadow-md border border-slate-100" />
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-900 flex items-center gap-1.5">
+                        <Smartphone className="w-5 h-5 text-indigo-600" />
+                        Install App & Favicon Guide
+                      </h3>
+                      <p className="text-xs text-slate-500">How to add Smart Ledger to your mobile device</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowInstallGuideModal(false)}
+                    className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer border-none bg-transparent"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="space-y-4 my-4">
+                  {/* Step 0: Open in full tab if inside iframe */}
+                  <div className="p-3.5 bg-indigo-50/80 rounded-xl border border-indigo-100 flex items-start gap-3">
+                    <ExternalLink className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
+                    <div className="text-xs text-slate-700 space-y-1">
+                      <strong className="text-indigo-900 block font-semibold">1. Open in Standalone Tab / Browser</strong>
+                      <p>
+                        PWA install prompts and Favicons require running outside of preview frames. Open the app directly in your browser:
+                      </p>
+                      <button
+                        onClick={() => window.open(window.location.href, '_blank')}
+                        className="mt-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 shadow-sm border-none cursor-pointer"
+                      >
+                        Open Direct URL in New Tab
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Step 1: iOS Safari */}
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex items-start gap-3">
+                    <Share2 className="w-5 h-5 text-slate-600 shrink-0 mt-0.5" />
+                    <div className="text-xs text-slate-700">
+                      <strong className="text-slate-900 block font-semibold mb-0.5">iPhone / iPad (iOS Safari):</strong>
+                      <ol className="list-decimal pl-4 space-y-1 text-slate-600">
+                        <li>Tap the <strong>Share button</strong> (square icon with upward arrow) at the bottom bar of Safari.</li>
+                        <li>Scroll down the share menu and tap <strong>"Add to Home Screen"</strong>.</li>
+                        <li>Tap <strong>Add</strong> at top right to launch as a native full-screen app icon!</li>
+                      </ol>
+                    </div>
+                  </div>
+
+                  {/* Step 2: Android Chrome */}
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex items-start gap-3">
+                    <Compass className="w-5 h-5 text-slate-600 shrink-0 mt-0.5" />
+                    <div className="text-xs text-slate-700">
+                      <strong className="text-slate-900 block font-semibold mb-0.5">Android (Chrome / Edge):</strong>
+                      <ol className="list-decimal pl-4 space-y-1 text-slate-600">
+                        <li>Tap the <strong>3 dots menu</strong> (top right corner).</li>
+                        <li>Select <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong>.</li>
+                      </ol>
+                    </div>
+                  </div>
+
+                  {/* Note on Favicons */}
+                  <div className="p-3 bg-amber-50 rounded-xl border border-amber-200/80 text-xs text-amber-900 flex items-start gap-2.5">
+                    <HelpCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <div>
+                      <strong>Why doesn't Favicon show inside previews?</strong>
+                      <p className="mt-0.5 text-amber-800">
+                        Browser tab icons are displayed by your top-level browser tab header, not inside embedded site iframes. When you open the direct site URL in your phone or browser tab, your custom favicon and manifest icon appear automatically!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    onClick={() => setShowInstallGuideModal(false)}
+                    className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold cursor-pointer border-none transition-colors"
+                  >
+                    Got it!
+                  </button>
+                </div>
+              </motion.div>
+            </div>
           )}
         </AnimatePresence>
       </>
@@ -1007,6 +1122,15 @@ export default function App() {
             </div>
 
             <div className="flex items-center gap-2 max-w-full overflow-x-auto scrollbar-none py-1">
+              <button
+                onClick={handleInstallClick}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors rounded-md border border-emerald-200 cursor-pointer focus:outline-none shrink-0 shadow-xs"
+                title="Install app on mobile/desktop"
+              >
+                <Smartphone className="w-4 h-4 text-emerald-600" />
+                Install App
+              </button>
+
               <button
                 onClick={editParticipants}
                 className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 border border-slate-200 transition-colors rounded-md cursor-pointer bg-white focus:outline-none shrink-0"
