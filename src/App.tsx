@@ -62,7 +62,6 @@ export default function App() {
   // PWA & Connection states
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [showInstallGuideModal, setShowInstallGuideModal] = useState(false);
 
   const handleInstallClick = () => {
@@ -195,11 +194,6 @@ export default function App() {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      // Only show banner if the app is not already installed/running in standalone mode
-      if (window.matchMedia('(display-mode: standalone)').matches) {
-        return;
-      }
-      setShowInstallBanner(true);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -215,7 +209,6 @@ export default function App() {
     const { outcome } = await deferredPrompt.userChoice;
     console.log(`User response to install prompt: ${outcome}`);
     setDeferredPrompt(null);
-    setShowInstallBanner(false);
   };
 
   const handleGoogleLogin = async () => {
@@ -584,50 +577,7 @@ export default function App() {
           )}
         </AnimatePresence>
 
-        {/* PWA Install Promo Banner */}
-        <AnimatePresence>
-          {showInstallBanner && (
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 50 }}
-              className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-md z-50 bg-slate-900 text-white p-4.5 rounded-2xl shadow-2xl border border-slate-800 flex flex-col gap-3 text-left"
-            >
-              <div className="flex items-start gap-3">
-                <img src="/icon-192.png" alt="App Icon" className="w-10 h-10 rounded-xl shrink-0 object-cover border border-slate-700 shadow-sm" />
-                <div className="flex-1">
-                  <h4 className="text-sm font-semibold text-white">Install Smart Ledger</h4>
-                  <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                    Add Smart Ledger to your home screen for rapid loading, instant offline bookkeeping, and native app experience.
-                  </p>
-                </div>
-                <button
-                  onClick={() => setShowInstallBanner(false)}
-                  className="text-slate-400 hover:text-white transition-colors cursor-pointer p-0.5 border-none bg-transparent"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              <div className="flex gap-2 justify-end">
-                <button
-                  onClick={() => {
-                    setShowInstallBanner(false);
-                    setShowInstallGuideModal(true);
-                  }}
-                  className="px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer border-none bg-transparent"
-                >
-                  How to Install?
-                </button>
-                <button
-                  onClick={handleInstallClick}
-                  className="px-4 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-lg shadow-indigo-900/40 transition-colors cursor-pointer border-none"
-                >
-                  Install Now
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+
 
         {/* PWA & Mobile Install Guide Modal */}
         <AnimatePresence>
